@@ -66,6 +66,16 @@ flutter:
     - assets/icons/profile.png
     - assets/icons/stack.png
     - assets/icons/weather.png
+    - assets/Books/achilles.png
+    - assets/Books/eleanornpark.png
+    - assets/Books/gildedwolves.png
+    - assets/Books/jadecity.png
+    - assets/Books/LukovL.png
+    - assets/Books/openeyes.png
+    - assets/Books/prideandprejudice.png
+    - assets/Books/silentpatient.png
+    - assets/Books/thursdaymurder.png
+
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

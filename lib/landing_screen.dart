@@ -6,7 +6,7 @@ class LandingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF7B5B68),
+      backgroundColor: Color(0xFF947887),
       body: Center(
         child: Padding(
           padding: EdgeInsets.all(24),
