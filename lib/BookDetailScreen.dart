@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
+import 'review_book.dart'; // ✅ Import your shared reviewedBooks list
 
 class BookDetailScreen extends StatefulWidget {
   final String title;
@@ -10,6 +10,8 @@ class BookDetailScreen extends StatefulWidget {
   final int pages;
   final String language;
 
+  final VoidCallback onBack; // Add onBack callback
+
   const BookDetailScreen({
     super.key,
     required this.title,
@@ -18,6 +20,7 @@ class BookDetailScreen extends StatefulWidget {
     required this.description,
     required this.pages,
     required this.language,
+    required this.onBack, // require onBack
   });
 
   @override
@@ -26,6 +29,7 @@ class BookDetailScreen extends StatefulWidget {
 
 class _BookDetailScreenState extends State<BookDetailScreen> {
   int submittedRating = 0; // ⭐ Holds the rating after review is submitted
+  String submittedReview = ""; // 📝 Holds the review text after submission
 
   @override
   Widget build(BuildContext context) {
@@ -37,12 +41,14 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
           children: [
             // 🔙 Back + Search Bar
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 12.0, vertical: 8),
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Color(0xFF3C090E)),
-                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(
+                        Icons.arrow_back, color: Color(0xFF3C090E)),
+                    onPressed: widget.onBack, // Use onBack callback here
                   ),
                   const SizedBox(width: 5),
                   Expanded(
@@ -65,7 +71,9 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
             ),
 
             // 🟤 Divider After Search
-            Container(height: 2, width: double.infinity, color: const Color(0xFF3C090E)),
+            Container(height: 2,
+                width: double.infinity,
+                color: const Color(0xFF3C090E)),
             const SizedBox(height: 12),
 
             // 📕 Book Image + Title + Author with Blurred Background
@@ -140,9 +148,11 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                 children: [
                   Column(
                     children: [
-                      const Icon(Icons.menu_book_rounded, color: Color(0xFF3C090E)),
+                      const Icon(
+                          Icons.menu_book_rounded, color: Color(0xFF3C090E)),
                       const SizedBox(height: 4),
-                      Text('${widget.pages}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                      Text('${widget.pages}',
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
                       const Text("Pages"),
                     ],
                   ),
@@ -151,7 +161,8 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                       Row(
                         children: List.generate(5, (index) {
                           return Icon(
-                            index < submittedRating ? Icons.star : Icons.star_border,
+                            index < submittedRating ? Icons.star : Icons
+                                .star_border,
                             size: 18,
                             color: const Color(0xFF3C090E),
                           );
@@ -165,7 +176,8 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                     children: [
                       const Icon(Icons.language, color: Color(0xFF3C090E)),
                       const SizedBox(height: 4),
-                      Text(widget.language, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      Text(widget.language,
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
                       const Text("Language"),
                     ],
                   ),
@@ -189,8 +201,10 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF3C090E),
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24)),
                 ),
                 onPressed: () {
                   showDialog(
@@ -198,16 +212,22 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                     builder: (context) {
                       int selectedRating = submittedRating;
                       TextEditingController reviewController = TextEditingController();
-                      final String currentDate = DateTime.now().toLocal().toString().split(' ')[0];
+                      final String currentDate = DateTime
+                          .now()
+                          .toLocal()
+                          .toString()
+                          .split(' ')[0];
 
                       return StatefulBuilder(
                         builder: (context, setStateDialog) {
                           return AlertDialog(
                             backgroundColor: const Color(0xFFFAF3F3),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20)),
                             title: const Text(
                               "Write a Review",
-                              style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF3C090E)),
+                              style: TextStyle(fontWeight: FontWeight.bold,
+                                  color: Color(0xFF3C090E)),
                             ),
                             content: Column(
                               mainAxisSize: MainAxisSize.min,
@@ -217,11 +237,14 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                   children: List.generate(5, (index) {
                                     return IconButton(
                                       icon: Icon(
-                                        index < selectedRating ? Icons.star : Icons.star_border,
+                                        index < selectedRating
+                                            ? Icons.star
+                                            : Icons.star_border,
                                         color: const Color(0xFF3C090E),
                                       ),
                                       onPressed: () {
-                                        setStateDialog(() => selectedRating = index + 1);
+                                        setStateDialog(() =>
+                                        selectedRating = index + 1);
                                       },
                                     );
                                   }),
@@ -241,25 +264,45 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                   ),
                                 ),
                                 const SizedBox(height: 12),
-                                Text("Date: $currentDate", style: const TextStyle(color: Colors.black54)),
+                                Text("Date: $currentDate",
+                                    style: const TextStyle(
+                                        color: Colors.black54)),
                               ],
                             ),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(context),
-                                child: const Text("Cancel", style: TextStyle(color: Colors.red)),
+                                child: const Text("Cancel",
+                                    style: TextStyle(color: Colors.red)),
                               ),
                               ElevatedButton(
                                 onPressed: () {
                                   setState(() {
                                     submittedRating = selectedRating;
+                                    submittedReview = reviewController.text;
+
+                                    // ✅ Save to global reviewedBooks list
+                                    reviewedBooks.add(
+                                      ReviewedBook(
+                                        title: widget.title,
+                                        author: widget.author,
+                                        image: widget.image,
+                                        description: widget.description,
+                                        pages: widget.pages,
+                                        language: widget.language,
+                                        rating: submittedRating,
+                                        review: submittedReview,
+                                        date: DateTime.now(),
+                                      ),
+                                    );
                                   });
                                   Navigator.pop(context);
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF3C090E),
                                 ),
-                                child: const Text("Submit", style: TextStyle(color: Colors.white)),
+                                child: const Text("Submit",
+                                    style: TextStyle(color: Colors.white)),
                               ),
                             ],
                           );
@@ -268,7 +311,8 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                     },
                   );
                 },
-                child: const Text("Write a Review", style: TextStyle(color: Colors.white)),
+                child: const Text(
+                    "Write a Review", style: TextStyle(color: Colors.white)),
               ),
             ),
 
@@ -318,40 +362,14 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                   ),
                   child: Text(
                     widget.description,
-                    style: const TextStyle(fontSize: 14, color: Colors.black87, height: 1.5),
+                    style: const TextStyle(
+                        fontSize: 14, color: Colors.black87, height: 1.5),
                   ),
                 ),
               ),
             ),
           ],
         ),
-      ),
-
-      // 🔽 Bottom Navigation Bar
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color(0xFF3C090E),
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white54,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        type: BottomNavigationBarType.fixed,
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const BookHomeScreen()),
-              );
-              break;
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(icon: ImageIcon(AssetImage('assets/icons/books.png')), label: ''),
-          BottomNavigationBarItem(icon: ImageIcon(AssetImage('assets/icons/stack.png')), label: ''),
-          BottomNavigationBarItem(icon: ImageIcon(AssetImage('assets/icons/journal.png')), label: ''),
-          BottomNavigationBarItem(icon: ImageIcon(AssetImage('assets/icons/weather.png')), label: ''),
-          BottomNavigationBarItem(icon: ImageIcon(AssetImage('assets/icons/profile.png')), label: ''),
-        ],
       ),
     );
   }
