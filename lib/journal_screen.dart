@@ -6,10 +6,7 @@ class Note {
   String content;
   DateTime date;
 
-  Note({
-    required this.content,
-    required this.date,
-  });
+  Note({required this.content, required this.date});
 }
 
 class JournalScreen extends StatefulWidget {
@@ -41,6 +38,17 @@ class _JournalScreenState extends State<JournalScreen> {
     ),
   ];
 
+  // Helper to sort notes (newest first)
+  void _sortNotes() {
+    notes.sort((a, b) => b.date.compareTo(a.date));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _sortNotes(); // sort initial notes
+  }
+
   // Open WritingJournalScreen to add a new note
   void _openWritingJournalScreen() async {
     final result = await Navigator.push<String>(
@@ -51,6 +59,7 @@ class _JournalScreenState extends State<JournalScreen> {
     if (result != null && result.trim().isNotEmpty) {
       setState(() {
         notes.add(Note(content: result.trim(), date: DateTime.now()));
+        _sortNotes(); // sort after adding
       });
     }
   }
@@ -60,13 +69,22 @@ class _JournalScreenState extends State<JournalScreen> {
     final result = await Navigator.push<String>(
       context,
       MaterialPageRoute(
-        builder: (context) => WritingJournalScreen(initialContent: note.content),
+        builder: (context) =>
+            WritingJournalScreen(initialContent: note.content),
       ),
     );
 
-    if (result != null && result.trim().isNotEmpty) {
+    if (result == "DELETE") {
+      // 🔴 Handle delete
+      setState(() {
+        notes.removeAt(index);
+        _sortNotes();
+      });
+    } else if (result != null && result.trim().isNotEmpty) {
+      // ✏️ Handle edit
       setState(() {
         notes[index] = Note(content: result.trim(), date: DateTime.now());
+        _sortNotes();
       });
     }
   }
@@ -85,7 +103,7 @@ class _JournalScreenState extends State<JournalScreen> {
       'Sep',
       'Oct',
       'Nov',
-      'Dec'
+      'Dec',
     ];
     final day = date.day;
     final month = months[date.month];
@@ -110,8 +128,10 @@ class _JournalScreenState extends State<JournalScreen> {
           children: [
             // 🔝 Header
             Padding(
-              padding:
-              const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 8,
+              ),
               child: Row(
                 children: [
                   Container(
@@ -120,8 +140,10 @@ class _JournalScreenState extends State<JournalScreen> {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: const Color(0xFF918D8C),
-                      border:
-                      Border.all(color: const Color(0xFF918D8C), width: 2),
+                      border: Border.all(
+                        color: const Color(0xFF918D8C),
+                        width: 2,
+                      ),
                       boxShadow: const [
                         BoxShadow(
                           color: Colors.black26,
@@ -150,7 +172,11 @@ class _JournalScreenState extends State<JournalScreen> {
                 ],
               ),
             ),
-            Container(height: 2, width: double.infinity, color: Color(0xFF3C090E)),
+            Container(
+              height: 2,
+              width: double.infinity,
+              color: Color(0xFF3C090E),
+            ),
             const SizedBox(height: 6),
             const Text(
               'Journal',
@@ -161,7 +187,11 @@ class _JournalScreenState extends State<JournalScreen> {
               ),
             ),
             const SizedBox(height: 6),
-            Container(height: 2, width: double.infinity, color: Color(0xFF3C090E)),
+            Container(
+              height: 2,
+              width: double.infinity,
+              color: Color(0xFF3C090E),
+            ),
             const SizedBox(height: 10),
 
             // Notes Grid

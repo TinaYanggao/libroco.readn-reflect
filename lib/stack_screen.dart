@@ -25,7 +25,7 @@ class _StackScreenState extends State<StackScreen> {
   Future<void> _openBookDetail(BuildContext context, int index) async {
     final book = books[index];
 
-    final updatedBook = await Navigator.push<Map<String, String>>(
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => BookDetailScreen(
@@ -36,15 +36,10 @@ class _StackScreenState extends State<StackScreen> {
           language: "English",
           description: getDescriptionForBook(book['title']!),
           onBack: () => Navigator.pop(context),
+          // Removed onSave and onDelete callbacks
         ),
       ),
     );
-
-    if (updatedBook != null) {
-      setState(() {
-        books[index] = updatedBook;
-      });
-    }
   }
 
   @override
@@ -54,7 +49,6 @@ class _StackScreenState extends State<StackScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // 🔝 Header
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
               child: Row(
@@ -107,8 +101,6 @@ class _StackScreenState extends State<StackScreen> {
             const SizedBox(height: 6),
             Container(height: 2, width: double.infinity, color: Color(0xFF3C090E)),
             const SizedBox(height: 10),
-
-            // 📚 Book Grid
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),

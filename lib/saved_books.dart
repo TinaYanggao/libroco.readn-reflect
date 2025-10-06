@@ -1,28 +1,20 @@
-// review_book.dart
-
-class ReviewedBook {
+class SavedBook {
   final String title;
   final String author;
   final String image;
   final String description;
   final int pages;
   final String language;
-  final int rating;
-  final String review;
-  final DateTime date;
 
-  ReviewedBook({
+  SavedBook({
     required this.title,
     required this.author,
     required this.image,
     required this.description,
     required this.pages,
     required this.language,
-    required this.rating,
-    required this.review,
-    required this.date,
   });
 }
 
-// ✅ Global list to store reviewed books
-List<ReviewedBook> reviewedBooks = [];
+// ✅ Global list of saved books
+List<SavedBook> savedBooks = [];

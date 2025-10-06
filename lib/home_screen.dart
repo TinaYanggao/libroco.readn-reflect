@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'dart:io'; // ✅ Added for File image handling
 import 'stack_screen.dart';
 
 import 'journal_screen.dart';
 import 'weather_screen.dart';
 import 'profile_screen.dart';
-
 import 'BookDetailScreen.dart'; // import your detail screen
+import 'addbook.dart'; // ✅ para magamit AddBookScreen
 
 class BookHomeScreen extends StatefulWidget {
   const BookHomeScreen({super.key});
@@ -19,6 +20,9 @@ class _BookHomeScreenState extends State<BookHomeScreen> {
 
   // Track if a book is selected (for showing detail page)
   Map<String, dynamic>? selectedBook;
+
+  // Extra list to hold user-added books
+  List<Map<String, dynamic>> addedBooks = [];
 
   // List of main pages (without Book Detail)
   final List<Widget> pages = [
@@ -43,6 +47,20 @@ class _BookHomeScreenState extends State<BookHomeScreen> {
     });
   }
 
+  // Add new book → open AddBookScreen
+  Future<void> _addBook() async {
+    final newBook = await Navigator.push<Map<String, dynamic>>(
+      context,
+      MaterialPageRoute(builder: (context) => const AddBookScreen()),
+    );
+
+    if (newBook != null) {
+      setState(() {
+        addedBooks.add(newBook);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,13 +78,16 @@ class _BookHomeScreenState extends State<BookHomeScreen> {
           : IndexedStack(
         index: selectIndex,
         children: pages.map((page) {
-          // Inject onBookTap only for BooksPageContent
           if (page is BooksPageContent) {
-            return BooksPageContent(onBookTap: onBookTap);
+            return BooksPageContent(
+              onBookTap: onBookTap,
+              extraBooks: addedBooks,
+            );
           }
           return page;
         }).toList(),
       ),
+
       bottomNavigationBar: selectedBook == null
           ? BottomNavigationBar(
         currentIndex: selectIndex,
@@ -99,16 +120,27 @@ class _BookHomeScreenState extends State<BookHomeScreen> {
               label: ''),
         ],
       )
-          : null, // hide navbar on detail page
+          : null,
+
+      // 🟢 Circle Button → opens AddBookScreen for a new book
+      floatingActionButton: (selectedBook == null && selectIndex == 0)
+          ? FloatingActionButton(
+        onPressed: _addBook,
+        backgroundColor: const Color(0xFF3C090E),
+        child: const Icon(Icons.add, color: Colors.white),
+      )
+          : null,
     );
   }
 }
 
-// Updated BooksPageContent to accept onBookTap callback
+// Updated BooksPageContent to accept onBookTap callback and extraBooks
 class BooksPageContent extends StatelessWidget {
   final Function(Map<String, dynamic>)? onBookTap;
+  final List<Map<String, dynamic>> extraBooks;
 
-  const BooksPageContent({super.key, this.onBookTap});
+  const BooksPageContent(
+      {super.key, this.onBookTap, this.extraBooks = const []});
 
   @override
   Widget build(BuildContext context) {
@@ -157,7 +189,7 @@ class BooksPageContent extends StatelessWidget {
               ],
             ),
           ),
-          Container(height: 2, width: 550, color: const Color(0xFF3C090E)),
+          Container(height: 2, width: 550, color: Color(0xFF3C090E)),
           const SizedBox(height: 12),
 
           // 🔍 Search Bar
@@ -177,7 +209,7 @@ class BooksPageContent extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-          Container(height: 2, width: 550, color: const Color(0xFF3C090E)),
+          Container(height: 2, width: 550, color: Color(0xFF3C090E)),
           const SizedBox(height: 8),
 
           // 📚 Book Sections
@@ -231,7 +263,13 @@ class BooksPageContent extends StatelessWidget {
                       'title': 'Don’t Open Your Eyes'
                     },
                   ]),
-                  const SizedBox(height: 16),
+                  separatorLine(),
+
+                  // Show extra user-added books under "My Books"
+                  if (extraBooks.isNotEmpty) ...[
+                    buildCategorySection('My Books', extraBooks),
+                    const SizedBox(height: 16),
+                  ],
                 ],
               ),
             ),
@@ -241,7 +279,7 @@ class BooksPageContent extends StatelessWidget {
     );
   }
 
-  Widget buildCategorySection(String title, List<Map<String, String>> books) {
+  Widget buildCategorySection(String title, List<Map<String, dynamic>> books) {
     return Padding(
       padding: const EdgeInsets.only(top: 16.0, bottom: 16),
       child: Column(
@@ -282,12 +320,7 @@ class BooksPageContent extends StatelessWidget {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                        child: Image.asset(
-                          book['image']!,
-                          width: 120,
-                          height: 170,
-                          fit: BoxFit.cover,
-                        ),
+                        child: _buildBookImage(book['image']!), // ✅ Fixed here
                       ),
                       const SizedBox(height: 8),
                       SizedBox(
@@ -313,6 +346,25 @@ class BooksPageContent extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  // ✅ Helper function: decide if image is asset or file
+  Widget _buildBookImage(String imagePath) {
+    if (imagePath.startsWith('assets/')) {
+      return Image.asset(
+        imagePath,
+        width: 120,
+        height: 170,
+        fit: BoxFit.cover,
+      );
+    } else {
+      return Image.file(
+        File(imagePath),
+        width: 120,
+        height: 170,
+        fit: BoxFit.cover,
+      );
+    }
   }
 
   Widget separatorLine() {
@@ -348,6 +400,8 @@ String getAuthorForBook(String title) {
       return 'Richard Osman';
     case 'Don’t Open Your Eyes':
       return 'Avery Bishop';
+    case 'New Book':
+      return 'Unknown Author';
     default:
       return 'Unknown Author';
   }
@@ -373,6 +427,8 @@ int getPagesForBook(String title) {
       return 368;
     case 'Don’t Open Your Eyes':
       return 350;
+    case 'New Book':
+      return 200;
     default:
       return 300;
   }
@@ -398,9 +454,9 @@ String getDescriptionForBook(String title) {
       return "Four elderly sleuths investigate a murder at their retirement village—charming and clever.";
     case 'Don’t Open Your Eyes':
       return "A suspenseful thriller following a mother’s nightmare as secrets unfold about her daughter.";
+    case 'New Book':
+      return "This is a placeholder book you added.";
     default:
       return "No description available.";
   }
 }
-
-
